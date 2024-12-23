@@ -25,11 +25,11 @@ android {
     compileSdkVersion 27
     buildToolsVersion "27.0.3"
     defaultConfig {
-        applicationId "com.game.motionelf"
+        applicationId "com.android.motionelf"
         minSdkVersion 21
         targetSdkVersion 23
-        versionCode 100000051
-        versionName "0.5.1-brack"
+        versionCode 100000061
+        versionName "0.6.1-shizuku"
     }
     buildTypes {
         release {

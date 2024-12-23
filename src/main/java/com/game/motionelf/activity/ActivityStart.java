@@ -1,34 +1,19 @@
 package com.game.motionelf.activity;
 
 import android.app.Activity;
+import android.content.ComponentName;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.system.ErrnoException;
 import android.system.Os;
+import android.widget.Toast;
+import com.game.motionelf.R;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 
 public class ActivityStart extends Activity {
 
     private static final String TAG = "MotionElf";
-
-    private static final String MOTIONELF = "#!/system/bin/sh\n" +
-            "\n" +
-            "path=/data/data/me.piebridge.brevent/brevent.sh\n" +
-            "comp=me.piebridge.brevent/.ui.BreventActivity\n" +
-            "\n" +
-            "if [ ! -r $path ]; then\n" +
-            "    am start -n $comp\n" +
-            "    sleep 3\n" +
-            "fi\n" +
-            "\n" +
-            "/system/bin/sh $path\n" +
-            "\n" +
-            "if [ $? -eq 0 ]; then\n" +
-            "    am start -n $comp\n" +
-            "fi\n";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,17 +24,33 @@ public class ActivityStart extends Activity {
 
     private void makeMotionelf() {
         d("making motionelf");
-        File files = getFilesDir();
+        File files = new File(getExternalFilesDir(null).getParentFile(), "server");
+        if (!files.exists())
+        {
+            if (!files.mkdirs())
+            {
+                d("Can't make motionelf");
+                Toast.makeText(getApplicationContext(), "激活器创建脚本出错", 0).show();
+                return;
+            }
+        }
         File output = new File(files, "motionelf_server");
         try (
-                OutputStream os = new FileOutputStream(output)
+                OutputStream os = new FileOutputStream(output);
+                InputStream is = getResources().openRawResource(R.raw.activate)
         ) {
-            os.write(MOTIONELF.getBytes());
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = is.read(buffer)) != -1) {
+                os.write(buffer, 0, bytesRead);
+            }
             os.flush();
             Os.chmod(output.getPath(), 0644);
         } catch (IOException | ErrnoException e) {
             d("Can't make motionelf", e);
+            Toast.makeText(getApplicationContext(), "激活器创建脚本出错", 0).show();
         }
+        Toast.makeText(getApplicationContext(), "激活器创建脚本成功", 0).show();
     }
 
     private void d(String s) {
